@@ -762,8 +762,7 @@ GameObject:
   - component: {fileID: 4859346038514666878}
   - component: {fileID: 4532596102711111801}
   - component: {fileID: 4166922123903135329}
-  - component: {fileID: 4753031197076896540}
-  - component: {fileID: 6805269787093943321}
+  - component: {fileID: 579400886522722492}
   - component: {fileID: 6884123366351217838}
   - component: {fileID: 3932790330548045631}
   m_Layer: 7
@@ -826,7 +825,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 5
+    VectorObservationSize: 7
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
@@ -844,7 +843,7 @@ MonoBehaviour:
   m_UseChildActuators: 1
   m_DeterministicInference: 0
   m_ObservableAttributeHandling: 0
---- !u!114 &4753031197076896540
+--- !u!114 &579400886522722492
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -853,7 +852,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6422336071162526933}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48ee63cb43bced54fb0757173dc0aeec, type: 3}
+  m_Script: {fileID: 11500000, guid: 90483ecae865dfa45942ede539452864, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   agentParameters:
@@ -869,35 +868,6 @@ MonoBehaviour:
   fishModel: {fileID: 1887362227644782289}
   lemonModel: {fileID: 8031869423678883542}
   trayModel: {fileID: 4668867349706867497}
---- !u!114 &6805269787093943321
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6422336071162526933}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6bb6b867a41448888c1cd4f99643ad71, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SensorName: RayPerceptionSensor
-  m_DetectableTags:
-  - FishTable
-  - LemonTable
-  - TrayTable
-  m_RaysPerDirection: 2
-  m_MaxRayDegrees: 60
-  m_SphereCastRadius: 0.5
-  m_RayLength: 20
-  m_RayLayerMask:
-    serializedVersion: 2
-    m_Bits: 4294967291
-  m_ObservationStacks: 1
-  rayHitColor: {r: 1, g: 0, b: 0, a: 1}
-  rayMissColor: {r: 1, g: 1, b: 1, a: 1}
-  m_StartVerticalOffset: 0.5
-  m_EndVerticalOffset: 0.5
 --- !u!114 &6884123366351217838
 MonoBehaviour:
   m_ObjectHideFlags: 0
