@@ -186,13 +186,13 @@ public class StaffAgent_V2 : Agent
 
             if (isHold)
             {
-                AddReward(-0.5f);
+                AddReward(-0.3f);
                 return;
             }
 
             if (isFishOnTray)
             {
-                AddReward(-0.5f);
+                AddReward(-0.3f);
                 return;
             }
             else
@@ -221,12 +221,12 @@ public class StaffAgent_V2 : Agent
             
             if (isHold)
             {
-                AddReward(-0.5f);
+                AddReward(-0.3f);
                 return;
             }
             if (!isFishOnTray)
             {
-                AddReward(-0.5f);
+                AddReward(-0.3f);
                 return;
             }
             else
@@ -261,7 +261,7 @@ public class StaffAgent_V2 : Agent
 
             if (!isHold)
             {
-                AddReward(-0.5f);
+                AddReward(-0.3f);
                 return;
             }
             else
