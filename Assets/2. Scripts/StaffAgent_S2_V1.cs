@@ -245,7 +245,7 @@ public class StaffAgent_S2_V1 : Agent
             {
                 return;
             }
-            if (!isFishOnTray)
+            if (!isFishOnTray || isLemonOnTray)
             {
                 return;
             }
@@ -297,6 +297,8 @@ public class StaffAgent_S2_V1 : Agent
                     trayModel.transform.SetParent(staffItemHolder.transform);
                     trayModel.transform.localPosition = Vector3.zero;
                     trayModel.transform.localRotation = Quaternion.identity;
+
+                    AddReward(+1);
                 }
             }
             else
