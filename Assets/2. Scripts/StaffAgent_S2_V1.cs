@@ -91,21 +91,20 @@ public class StaffAgent_S2_V1 : Agent
         sensor.AddObservation(transform.forward);
 
         sensor.AddObservation(isHold);
+        sensor.AddObservation(isFishOnTray ? 1 : 0);
+        sensor.AddObservation(isLemonOnTray ? 1 : 0);
 
-        // #2 agent와 foodArea 사이의 거리
-        Vector3 dirFoodArea = (foodArea.localPosition - transform.localPosition).normalized;
-        sensor.AddObservation(dirFoodArea.x);
-        sensor.AddObservation(dirFoodArea.z);
+        // #2 agent와 foodArea 사이의 방향과 거리
+        sensor.AddObservation((foodArea.localPosition - transform.localPosition).normalized);
+        sensor.AddObservation(Vector3.Distance(foodArea.position, transform.position));
 
-        // #3 agent와 trayArea 사이의 거리
-        Vector3 dirTrayTable = (trayModel.transform.localPosition - transform.localPosition).normalized;
-        sensor.AddObservation(dirTrayTable.x);
-        sensor.AddObservation(dirTrayTable.z);
+        // #3 agent와 trayArea 사이의 방향과 거리
+        sensor.AddObservation((trayModel.transform.localPosition - transform.localPosition).normalized);
+        sensor.AddObservation(Vector3.Distance(trayModel.transform.position, transform.position));
 
-        // #4 agent와 pointArea 사이의 거리
-        Vector3 dirPointArea = (pointArea.localPosition - transform.localPosition).normalized;
-        sensor.AddObservation(dirPointArea.x);
-        sensor.AddObservation(dirPointArea.z);
+        // #4 agent와 pointArea 사이의 방향과 거리
+        sensor.AddObservation((pointArea.localPosition - transform.localPosition).normalized);
+        sensor.AddObservation(Vector3.Distance(pointArea.position, transform.position));
     }
 
     // 정책에 의해서 정해진 행동 지침 (받아야 하는 정보)
@@ -136,7 +135,7 @@ public class StaffAgent_S2_V1 : Agent
         // 매 Step마다 작은 패널티 부여
         if (MaxStep > 0)
         {
-            AddReward(-1f / MaxStep); // MaxStep = 5000
+            AddReward(-0.001f);
         }
     }
 
@@ -210,14 +209,11 @@ public class StaffAgent_S2_V1 : Agent
 
             if (isHold)
             {
+                AddReward(-0.05f);
                 return;
             }
 
-            if (isFishOnTray)
-            {
-                return;
-            }
-            else
+            if (!isFishOnTray)
             {
                 isHold = true;
 
@@ -227,6 +223,11 @@ public class StaffAgent_S2_V1 : Agent
                 fishModel.transform.localRotation = Quaternion.identity;
 
                 AddReward(+1);
+            }
+            else
+            {
+                AddReward(-0.05f);
+                return;
             }
         }
         // #2-2 테이블의 tag 정보가 lemon일 경우
@@ -243,10 +244,12 @@ public class StaffAgent_S2_V1 : Agent
 
             if (isHold)
             {
+                AddReward(-0.05f);
                 return;
             }
             if (!isFishOnTray || isLemonOnTray)
             {
+                AddReward(-0.05f);
                 return;
             }
             else
@@ -287,6 +290,7 @@ public class StaffAgent_S2_V1 : Agent
             {
                 if (!isLemonOnTray)
                 {
+                    AddReward(-0.05f);
                     return;
                 }
                 else
@@ -329,6 +333,7 @@ public class StaffAgent_S2_V1 : Agent
                 }
                 else
                 {
+                    AddReward(-0.05f);
                     return;
                 }
             }
@@ -345,14 +350,14 @@ public class StaffAgent_S2_V1 : Agent
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log("Point 트리거 진입");
         if (other.transform.CompareTag("Point"))
         {
             if (isHold && isLemonOnTray)
             {
-                AddReward(+1);
+                AddReward(+2);
                 EndEpisode();
             }
-            return;
         }
     }
 }
