@@ -605,6 +605,7 @@ MonoBehaviour:
   fishModel: {fileID: 4225591716387111713}
   lemonModel: {fileID: 2365010589121409447}
   trayModel: {fileID: 2814970512732469077}
+  gTables: []
 --- !u!114 &6096188087035292823
 MonoBehaviour:
   m_ObjectHideFlags: 0

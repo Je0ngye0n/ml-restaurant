@@ -10,7 +10,7 @@ using Unity.MLAgents;
 using static UnityEngine.ParticleSystem;
 using System;
 
-public class StaffAgent_S2_V1 : Agent
+public class StaffAgent_S3_1 : Agent
 {
     public float moveSpeed = 5f;
     public float turnSpeed = 180f;
@@ -19,6 +19,7 @@ public class StaffAgent_S2_V1 : Agent
 
     public Transform foodArea;
     public Transform pointArea;
+    public Transform[] pointAreas;
 
     public GameObject itemItitPos;
     public GameObject staffItemHolder;
@@ -45,7 +46,7 @@ public class StaffAgent_S2_V1 : Agent
     private bool isFishOnTray;
     private bool isLemonOnTray;
 
-    public GTable[] gTables;
+    public GTable gTable;
 
     public override void Initialize()
     {
@@ -63,11 +64,8 @@ public class StaffAgent_S2_V1 : Agent
         originalTrayPos = trayModel.transform.localPosition;
         originalTrayRot = trayModel.transform.localRotation;
 
-        for (int i = 0; i < gTables.Length; i++)
-        {
-            GTable table = gTables[i];
-            table.isGuest = false;
-        }
+        gTable.isGuest = true;
+        guestTransform = gTable.guestModel.transform;
     }
 
     public override void OnEpisodeBegin()
@@ -80,6 +78,11 @@ public class StaffAgent_S2_V1 : Agent
         // 포인트 콜라이더 켜기
         pointArea.gameObject.GetComponent<BoxCollider>().enabled = true;
 
+        for (int i = 0; i< pointArea.childCount; i++)
+        {
+            pointAreas[i].gameObject.GetComponent<BoxCollider>().enabled = true;
+        }
+
         // #4 agent 위치 초기화 -> velocity, angularVelocity = 0
         ResetStaff();
 
@@ -90,30 +93,25 @@ public class StaffAgent_S2_V1 : Agent
         isFishOnTray = false;
         isLemonOnTray = false;
 
-        // 게스트 위치 랜덤 설정
-        int randomValue = UnityEngine.Random.Range(0, 2);
-        switch (randomValue)
-        {
-            case 0:
-                gTables[0].isGuest = true;
-                guestTransform = gTables[0].GetGuestTransform();
-                gTables[1].isGuest = false;
-                break;
-            case 1:
-                gTables[0].isGuest = false;
-                gTables[1].isGuest = true;
-                guestTransform = gTables[1].GetGuestTransform();
-                break;
-            default:
-                break;
-        }
+        //// 게스트 위치 랜덤 설정
+        //int randomValue = UnityEngine.Random.Range(0, 2);
+        //switch (randomValue)
+        //{
+        //    case 0:
+        //        gTables[0].isGuest = true;
+        //        guestTransform = gTables[0].GetGuestTransform();
+        //        gTables[1].isGuest = false;
+        //        break;
+        //    case 1:
+        //        gTables[0].isGuest = false;
+        //        gTables[1].isGuest = true;
+        //        guestTransform = gTables[1].GetGuestTransform();
+        //        break;
+        //    default:
+        //        break;
+        //}
 
-        for (int i = 0; i < gTables.Length; i++)
-        {
-            GTable table = gTables[i];
-            table.ResetGuestModel();
-            table.SpawnGuest();
-        }
+        gTable.SpawnGuest();
     }
 
     // 관찰해야하는 값 (넘겨 줘야 하는 정보)(관찰 정보 기록)
@@ -177,11 +175,14 @@ public class StaffAgent_S2_V1 : Agent
         // 매 Step마다 작은 패널티 부여
         if (MaxStep > 0)
         {
-            if (transform.localPosition.x < 6.0f)
+            if (transform.localPosition.x > 6.0f && isHold && isLemonOnTray)
+            {
+                AddReward(-0.0005f);
+            }
+            else
             {
                 AddReward(-0.001f);
             }
-            AddReward(-0.0005f);
         }
     }
 
@@ -427,8 +428,8 @@ public class StaffAgent_S2_V1 : Agent
         {
             if (isHold && isLemonOnTray)
             {
-                AddReward(+1.5f);
-                var pointAreaCol = pointArea.gameObject.GetComponent<BoxCollider>();
+                AddReward(+0.5f);
+                var pointAreaCol = other.gameObject.GetComponent<BoxCollider>();
                 pointAreaCol.enabled = false;
             }
         }

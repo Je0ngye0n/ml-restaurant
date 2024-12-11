@@ -9,6 +9,8 @@ TagManager:
   - FishTable
   - LemonTable
   - TrayTable
+  - GuestTable
+  - Guest
   layers:
   - Default
   - TransparentFX
