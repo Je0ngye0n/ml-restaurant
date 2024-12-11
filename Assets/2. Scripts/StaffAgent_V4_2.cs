@@ -10,21 +10,14 @@ using Unity.MLAgents;
 using static UnityEngine.ParticleSystem;
 using System;
 
-public enum Content
-{
-    Fish = 0,
-    Lemon = 1 << 0,     // 0001
-    Tray = 1 << 1,      // 0010
-    Guest = 1 << 2,     // 0100
-    None = 1 << 3,      // 1000
-}
-
-public class StaffAgent_V1 : Agent
+public class StaffAgent_V4_2 : Agent
 {
     public float moveSpeed = 5f;
     public float turnSpeed = 180f;
 
     private Rigidbody staffRigidbody;
+
+    public Transform foodArea;
 
     public GameObject itemItitPos;
     public GameObject staffItemHolder;
@@ -87,10 +80,25 @@ public class StaffAgent_V1 : Agent
     {
         // #1 isHold 값
         // #2 isFishOnTray 값
-        // #3 agent가 바라보는 정보
-        sensor.AddObservation(isHold);
-        sensor.AddObservation(isFishOnTray);
+        // #3 isHold와 isFishOnTray값에 따른 agent와 테이블 사이의 거리
+        // #4 agent가 바라보는 정보 ?
+
         sensor.AddObservation(transform.forward);
+
+        sensor.AddObservation(isHold);
+
+        if (!isHold)
+        {
+            Vector3 dirFoodArea = (foodArea.localPosition - transform.localPosition).normalized;
+            sensor.AddObservation(dirFoodArea.x);
+            sensor.AddObservation(dirFoodArea.z);
+        }
+        else
+        {
+            Vector3 dirTrayTable = (trayModel.transform.localPosition - transform.localPosition).normalized;
+            sensor.AddObservation(dirTrayTable.x);
+            sensor.AddObservation(dirTrayTable.z);
+        }
     }
 
     // 정책에 의해서 정해진 행동 지침 (받아야 하는 정보)
@@ -118,10 +126,10 @@ public class StaffAgent_V1 : Agent
         staffRigidbody.MovePosition(transform.position + transform.forward * forwardAmount * moveSpeed * Time.fixedDeltaTime);
         transform.Rotate(transform.up * turnAmount * turnSpeed * Time.fixedDeltaTime);
 
-        // 매 Step마다 작은 패널티(-0.001) 부여
+        // 매 Step마다 작은 패널티 부여
         if (MaxStep > 0)
         {
-            AddReward(-0.001f);
+            AddReward(-1f / MaxStep); // MaxStep = 5000
         }
     }
 

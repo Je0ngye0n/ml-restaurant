@@ -10,16 +10,7 @@ using Unity.MLAgents;
 using static UnityEngine.ParticleSystem;
 using System;
 
-public enum Content
-{
-    Fish = 0,
-    Lemon = 1 << 0,     // 0001
-    Tray = 1 << 1,      // 0010
-    Guest = 1 << 2,     // 0100
-    None = 1 << 3,      // 1000
-}
-
-public class StaffAgent_V1 : Agent
+public class StaffAgent_V2 : Agent
 {
     public float moveSpeed = 5f;
     public float turnSpeed = 180f;
@@ -195,11 +186,13 @@ public class StaffAgent_V1 : Agent
 
             if (isHold)
             {
+                AddReward(-0.3f);
                 return;
             }
 
             if (isFishOnTray)
             {
+                AddReward(-0.3f);
                 return;
             }
             else
@@ -228,10 +221,12 @@ public class StaffAgent_V1 : Agent
             
             if (isHold)
             {
+                AddReward(-0.3f);
                 return;
             }
             if (!isFishOnTray)
             {
+                AddReward(-0.3f);
                 return;
             }
             else
@@ -266,6 +261,7 @@ public class StaffAgent_V1 : Agent
 
             if (!isHold)
             {
+                AddReward(-0.3f);
                 return;
             }
             else

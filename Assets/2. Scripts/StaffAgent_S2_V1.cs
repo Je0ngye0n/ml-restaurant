@@ -10,21 +10,15 @@ using Unity.MLAgents;
 using static UnityEngine.ParticleSystem;
 using System;
 
-public enum Content
-{
-    Fish = 0,
-    Lemon = 1 << 0,     // 0001
-    Tray = 1 << 1,      // 0010
-    Guest = 1 << 2,     // 0100
-    None = 1 << 3,      // 1000
-}
-
-public class StaffAgent_V1 : Agent
+public class StaffAgent_S2_V1 : Agent
 {
     public float moveSpeed = 5f;
     public float turnSpeed = 180f;
 
     private Rigidbody staffRigidbody;
+
+    public Transform foodArea;
+    public Transform pointArea;
 
     public GameObject itemItitPos;
     public GameObject staffItemHolder;
@@ -45,9 +39,10 @@ public class StaffAgent_V1 : Agent
     private Quaternion originalTrayRot;
 
     private bool isHold; // true라면, agent가 오브젝트를 들고 있음
-    
+
     // fish가 tray에 담겼는지 안 담겼는지 판단
     private bool isFishOnTray;
+    private bool isLemonOnTray;
 
     public override void Initialize()
     {
@@ -78,19 +73,38 @@ public class StaffAgent_V1 : Agent
 
         // #5 isHold 변수 false로 초기화
         // #6 isFishOnTray 변수 false로 초기화
+        // #7 isLemonOnTray 변수 false로 초기화
         isHold = false;
         isFishOnTray = false;
+        isLemonOnTray = false;
     }
 
     // 관찰해야하는 값 (넘겨 줘야 하는 정보)(관찰 정보 기록)
     public override void CollectObservations(VectorSensor sensor)
     {
         // #1 isHold 값
-        // #2 isFishOnTray 값
-        // #3 agent가 바라보는 정보
-        sensor.AddObservation(isHold);
-        sensor.AddObservation(isFishOnTray);
+        // #2 agent와 foodArea 사이의 거리
+        // #3 agent와 trayArea 사이의 거리
+        // #4 agent와 pointArea 사이의 거리
+        // #5 agent가 바라보는 정보
+
         sensor.AddObservation(transform.forward);
+
+        sensor.AddObservation(isHold);
+        sensor.AddObservation(isFishOnTray ? 1 : 0);
+        sensor.AddObservation(isLemonOnTray ? 1 : 0);
+
+        // #2 agent와 foodArea 사이의 방향과 거리
+        sensor.AddObservation((foodArea.localPosition - transform.localPosition).normalized);
+        sensor.AddObservation(Vector3.Distance(foodArea.position, transform.position));
+
+        // #3 agent와 trayArea 사이의 방향과 거리
+        sensor.AddObservation((trayModel.transform.localPosition - transform.localPosition).normalized);
+        sensor.AddObservation(Vector3.Distance(trayModel.transform.position, transform.position));
+
+        // #4 agent와 pointArea 사이의 방향과 거리
+        sensor.AddObservation((pointArea.localPosition - transform.localPosition).normalized);
+        sensor.AddObservation(Vector3.Distance(pointArea.position, transform.position));
     }
 
     // 정책에 의해서 정해진 행동 지침 (받아야 하는 정보)
@@ -118,7 +132,7 @@ public class StaffAgent_V1 : Agent
         staffRigidbody.MovePosition(transform.position + transform.forward * forwardAmount * moveSpeed * Time.fixedDeltaTime);
         transform.Rotate(transform.up * turnAmount * turnSpeed * Time.fixedDeltaTime);
 
-        // 매 Step마다 작은 패널티(-0.001) 부여
+        // 매 Step마다 작은 패널티 부여
         if (MaxStep > 0)
         {
             AddReward(-0.001f);
@@ -185,24 +199,21 @@ public class StaffAgent_V1 : Agent
         if (collision.transform.CompareTag("FishTable"))
         {
             // 1. 만약 아무 것도 들고 있지 않다면 (isHold = false)
-                // (isFishOnTray false라면)
-                    // 1) 들고 있는 상태로 전환 : isHold = true
-                    // 2) fish를 player 머리 위로 옮김
-                    // 예시 코드 : targetObject.transform.SetParent(parentObject.transform);
-                    // 3) +1 보상
-                // (isFishOnTray true라면 그대로 리턴)
+            // (isFishOnTray false라면)
+            // 1) 들고 있는 상태로 전환 : isHold = true
+            // 2) fish를 player 머리 위로 옮김
+            // 예시 코드 : targetObject.transform.SetParent(parentObject.transform);
+            // 3) +1 보상
+            // (isFishOnTray true라면 그대로 리턴)
             // 2. 만약 무언 갈 들고 있다면 그대로 리턴(콜리젼 넘김)
 
             if (isHold)
             {
+                AddReward(-0.05f);
                 return;
             }
 
-            if (isFishOnTray)
-            {
-                return;
-            }
-            else
+            if (!isFishOnTray)
             {
                 isHold = true;
 
@@ -213,25 +224,32 @@ public class StaffAgent_V1 : Agent
 
                 AddReward(+1);
             }
-        }
-        // #2-2 테이블의 tag 정보가 lemon일 경우
-        else if (collision.transform.CompareTag("LemonTable")) 
-        {
-                // 1. 만약 아무 것도 들고 있지 않다면 (isHold = false)
-                    // 1) isFishOnTray true인지 판단
-                        // 1-1) True라면
-                            // (1) 들고 있는 상태로 전환 isHold = true
-                            // (2) lemon을 player 머리 위로 옮김
-                            // (3) +1 보상
-                        // 1-2) False라면 그대로 리턴
-                // 2. 만약 무언갈 들고 있다면 그대로 리턴
-            
-            if (isHold)
+            else
             {
+                AddReward(-0.05f);
                 return;
             }
-            if (!isFishOnTray)
+        }
+        // #2-2 테이블의 tag 정보가 lemon일 경우
+        else if (collision.transform.CompareTag("LemonTable"))
+        {
+            // 1. 만약 아무 것도 들고 있지 않다면 (isHold = false)
+            // 1) isFishOnTray true인지 판단
+            // 1-1) True라면
+            // (1) 들고 있는 상태로 전환 isHold = true
+            // (2) lemon을 player 머리 위로 옮김
+            // (3) +1 보상
+            // 1-2) False라면 그대로 리턴
+            // 2. 만약 무언갈 들고 있다면 그대로 리턴
+
+            if (isHold)
             {
+                AddReward(-0.05f);
+                return;
+            }
+            if (!isFishOnTray || isLemonOnTray)
+            {
+                AddReward(-0.05f);
                 return;
             }
             else
@@ -247,49 +265,76 @@ public class StaffAgent_V1 : Agent
             }
         }
         // #2-3 테이블의 tag 정보가 tray일 경우
-        else if (collision.transform.CompareTag("TrayTable")) 
+        else if (collision.transform.CompareTag("TrayTable"))
         {
-                // 1. 만약 아무 것도 들고 있지 않다면 (isHold = false)
-                    // 1) 그대로 리턴
-                // 2. 만약 무언갈 들고 있다면 (isHold = true)
-                    // 1) isFishOnTray true인지 판단
-                        // 1-1) False라면
-                            // (1) 들고 있지 않은 상태로 전환 : isHold = false
-                            // (2) 들고 있는 오브젝트(물고기)를 Tray로 옮김
-                            // (3) isPickedFish를 true로 변경
-                            // (4) +1 보상
-                        // 1-2) True라면
-                            // (1) 들고 있지 않은 상태로 전환 : isHold = false
-                            // (2) 들고 있는 오브젝트(레몬)을 Tray로 옮김
-                            // (3) +1 보상
-                            // (4) 에피소드 종료
+            // 1. 만약 아무 것도 들고 있지 않다면 (isHold = false)
+            // 1) 레몬이 트레이 위에 쌓였다면 tray를 player 머리 위로 옮김 (이때, isHold = true 변경)
+            // 2) 레몬이 트레이 위에 쌓이지 않았다면 그대로 리턴
+            // 2. 만약 무언갈 들고 있다면 (isHold = true)
+            // 만약 레몬이 트레이 위에 쌓이지 않았다면
+            // 1) isFishOnTray true인지 판단
+            // 1-1) False라면
+            // (1) 들고 있지 않은 상태로 전환 : isHold = false
+            // (2) 들고 있는 오브젝트(물고기)를 Tray로 옮김
+            // (3) isPickedFish를 true로 변경
+            // (4) +1 보상
+            // 1-2) True라면
+            // (1) 들고 있지 않은 상태로 전환 : isHold = false
+            // (2) 들고 있는 오브젝트(레몬)을 Tray로 옮김
+            // (3) +1 보상
+            // (4) 에피소드 종료
+            // 만약 레몬이 트레이 위에 쌓였다면(=트레이를 들고 있다면) 그대로 리턴
+
 
             if (!isHold)
             {
-                return;
-            }
-            else
-            {
-                isHold = false;
-                if (!isFishOnTray)
+                if (!isLemonOnTray)
                 {
-                    // (2) 들고 있는 오브젝트(물고기)를 Tray로 옮김
-                    fishModel.transform.SetParent(fishTrayPoint.transform);
-                    fishModel.transform.localPosition = Vector3.zero;
-                    fishModel.transform.localRotation = Quaternion.identity;
-
-                    isFishOnTray = true;
-                    AddReward(+1);
+                    AddReward(-0.05f);
+                    return;
                 }
                 else
                 {
-                    // (2) 들고 있는 오브젝트(레몬)을 Tray로 옮김
-                    lemonModel.transform.SetParent(lemonTrayPoint.transform);
-                    lemonModel.transform.localPosition = Vector3.zero;
-                    lemonModel.transform.localRotation = Quaternion.identity;
+                    isHold = true;
+
+                    // tray를 player 머리 위로 옮김
+                    trayModel.transform.SetParent(staffItemHolder.transform);
+                    trayModel.transform.localPosition = Vector3.zero;
+                    trayModel.transform.localRotation = Quaternion.identity;
 
                     AddReward(+1);
-                    EndEpisode();
+                }
+            }
+            else
+            {
+                if (!isLemonOnTray)
+                {
+                    isHold = false;
+                    if (!isFishOnTray)
+                    {
+                        // (2) 들고 있는 오브젝트(물고기)를 Tray로 옮김
+                        fishModel.transform.SetParent(fishTrayPoint.transform);
+                        fishModel.transform.localPosition = Vector3.zero;
+                        fishModel.transform.localRotation = Quaternion.identity;
+
+                        isFishOnTray = true;
+                        AddReward(+1);
+                    }
+                    else
+                    {
+                        // (2) 들고 있는 오브젝트(레몬)을 Tray로 옮김
+                        lemonModel.transform.SetParent(lemonTrayPoint.transform);
+                        lemonModel.transform.localPosition = Vector3.zero;
+                        lemonModel.transform.localRotation = Quaternion.identity;
+
+                        isLemonOnTray = true;
+                        AddReward(+1);
+                    }
+                }
+                else
+                {
+                    AddReward(-0.05f);
+                    return;
                 }
             }
         }
@@ -300,6 +345,19 @@ public class StaffAgent_V1 : Agent
 
             AddReward(-1);
             EndEpisode();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("Point 트리거 진입");
+        if (other.transform.CompareTag("Point"))
+        {
+            if (isHold && isLemonOnTray)
+            {
+                AddReward(+2);
+                EndEpisode();
+            }
         }
     }
 }
