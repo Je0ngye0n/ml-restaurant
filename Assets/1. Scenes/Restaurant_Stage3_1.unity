@@ -2009,9 +2009,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2217992432021876365, guid: 1bd6f58cef7158b4aa5ea19ff9bfaf1a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4002151016939958453, guid: 1bd6f58cef7158b4aa5ea19ff9bfaf1a, type: 3}
       propertyPath: m_Name
       value: Stage3_Area_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4002151016939958453, guid: 1bd6f58cef7158b4aa5ea19ff9bfaf1a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
