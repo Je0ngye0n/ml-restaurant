@@ -2013,6 +2013,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3412691802001560957, guid: 1bd6f58cef7158b4aa5ea19ff9bfaf1a, type: 3}
+      propertyPath: m_Model
+      value: 
+      objectReference: {fileID: 5022602860645237092, guid: 84515e183573cbd44a03332d6c5eeeb5, type: 3}
     - target: {fileID: 4002151016939958453, guid: 1bd6f58cef7158b4aa5ea19ff9bfaf1a, type: 3}
       propertyPath: m_Name
       value: Stage3_Area_1
