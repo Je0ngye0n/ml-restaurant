@@ -6,7 +6,11 @@ TagManager:
   tags:
   - Wall
   - Point
-  - Table
+  - FishTable
+  - LemonTable
+  - TrayTable
+  - GuestTable
+  - Guest
   layers:
   - Default
   - TransparentFX
@@ -15,7 +19,7 @@ TagManager:
   - Water
   - UI
   - 
-  - 
+  - Interactable
   - 
   - 
   - 
